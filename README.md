@@ -1,4 +1,4 @@
-# Intelligent Robotic Manipulation
+# Adaptive Pick and Place 
 
 The overall Goal of the project is to grasp a YCB-Object and place it in a goal basket while avoiding obstacles. To do
 this we have provided some helpful tips/information on various subtasks that you may or may not need to solve. Perception (task 1) to detect the graspable object, Controller (task 2) to move your robot arm, sample and execute a grasp (task 3), localize and track obstacles (task 4) and plan the trajectory to place the object in the goal, while avoiding the obstacles (task 5). Note that, what we mention in the task subparts are just for guidance and you are fully free to choose whatever you want to use to accomplish the full task. But you need to make sure that you don't use privilege information from the sim in the process.
@@ -119,6 +119,3 @@ Motion planning can be generally decoupled into global planning and motion plann
     * A more advanced approach is to use MPC or sampling-based MPC to handle the moving obstacles. You can check [this](https://github.com/tud-amr/m3p2i-aip) for more details, though the kinematic model and collision checking are done in IsaacGym.
 
 You can decide to use whichever techniques to solve the task, you can use either a `global planner` and a `local planner` combination, or you can directly use the sampling-based MPC to avoid static and dynamic obstacles.
-
-# Final Words:
-We hope you have fun and explore robotics more deeply through this project.
