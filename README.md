@@ -2,16 +2,35 @@
 
 The overall Goal of the project is to grasp a YCB-Object and place it in a goal basket while avoiding obstacles. Task 1 was to detect the graspable object, Controller (task 2) to move your robot arm, sample and execute a grasp (task 3), localize and track obstacles (task 4) and plan the trajectory to place the object in the goal, while avoiding the obstacles (task 5). Note that, what we mention in the task subparts are just for guidance and you are fully free to choose whatever you want to use to accomplish the full task. But you need to make sure that you don't use privilege information from the sim in the process.
 
+## Setting up the development environment 
+
+
 ```shell
-git clone https://github.com/iROSA-lab/irobman_project_wise2324.git
-cd irobman_project_wise2324
+git clone https://github.com/rafey1104/adaptive_pick_and_place_franka_robot.git
+```
+```shell
+cd adaptive_pick_and_place_franka_robot
+```
+```shell
 conda create -n irobman python=3.8
+```
+```shell
 conda activate irobman
+```
+```shell
 conda install pybullet
+```
+```shell
 pip install matplotlib pyyaml
+```
+```shell
 git clone https://github.com/eleramp/pybullet-object-models.git # inside the irobman_project folder
+```
+```shell
 pip install -e pybullet-object-models/
 ```
+
+
 
 Note that you should check after the installation if pybullet is using numpy or not by running `pybullet.isNumpyEnabled()` in your code. Everything can still run without this too but it will be slow. You can also increase the speed of execution by choosing not to see the camera output in the GUI by toggling `cam_render_flag`. You will be able to still see the GUI but the cam output there will not be visible.
 
