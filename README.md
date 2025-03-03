@@ -1,4 +1,4 @@
-# Adaptive Pick and Place Franka Robot 
+# Adaptive Pick and Place Franka Robot (Under Developement)
 
 The overall Goal of the project is to grasp a YCB-Object and place it in a goal basket while avoiding obstacles. Task 1 was to detect the graspable object, Controller (task 2) to move your robot arm, sample and execute a grasp (task 3), localize and track obstacles (task 4) and plan the trajectory to place the object in the goal, while avoiding the obstacles (task 5). Note that, what we mention in the task subparts are just for guidance and you are fully free to choose whatever you want to use to accomplish the full task. But you need to make sure that you don't use privilege information from the sim in the process.
 
