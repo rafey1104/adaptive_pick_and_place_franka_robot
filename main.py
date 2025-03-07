@@ -1,16 +1,29 @@
 import os
 import glob
 import yaml
+import time
 import pybullet as p
 
+from pyntcloud import PyntCloud
+
+import open3d as o3d
 import numpy as np
 
 from typing import Dict, Any
 
 from pybullet_object_models import ycb_objects  # type:ignore
 
+# #import for megapose6d
+# from megapose.datasets.object_dataset import RigidObjectDataset
+# from megapose.inference.pose_estimator import PoseEstimator
+# from megapose.inference.types import DetectionsType, PoseEstimatesType
+# from megapose.lib3d.transform import Transform
+
+
 from src.simulation import Simulation
 from src.perception import Perception as perc
+
+#from src.pickandplace import PickAndPlace
 
 def run_exp(config: Dict[str, Any]):
     # Example Experiment Runner File
@@ -20,6 +33,17 @@ def run_exp(config: Dict[str, Any]):
     files = glob.glob(os.path.join(object_root_path, "Ycb*"))
     obj_names = [file.split('/')[-1] for file in files]
     sim = Simulation(config)
+    projection_matrix = np.array(sim.projection_matrix).reshape(4, 4)
+    width, height = 480, 640 # from image dimensions
+    fx = projection_matrix[0, 0]
+    fy = projection_matrix[1, 1]
+    cx = projection_matrix[0, 2]
+    cy = projection_matrix[1, 2]
+    ##megapose implementation 
+    # Load MegaPose model
+    #pose_estimator = PoseEstimator()
+    
+
     for obj_name in obj_names:
         for tstep in range(10):
             sim.reset(obj_name)
@@ -37,26 +61,94 @@ def run_exp(config: Dict[str, Any]):
             ee_pos, ee_ori = sim.robot.get_ee_pose()
             print(f"Robot End Effector Position: {ee_pos}")
             print(f"Robot End Effector Orientation: {ee_ori}")
-            for i in range(10000):
+            print("Performing pick and place for:", obj_name)
+
+            object_pose = (268.43943773, 111.16001867,   1.99634455)
+
+            object_orientation = (0.0, 0.0, 0.0, 1.0)
+            # Convert quaternion to rotation matrix
+            goal_orientation_matrix = sim.control.quaternion_to_rotation_matrix(object_orientation)
+            
+            print("Goal orientation roation matrix:", goal_orientation_matrix)
+
+            # Get the initial joint angles from the robot
+            initial_joint_angles = sim.robot.get_joint_positions()
+
+            print("Inital joint angles of the robot:", initial_joint_angles)
+
+            # calculating the new joint angles that the franka has to be in to get reach the object location 
+
+            final_joint_angles = sim.control.ik_solver(
+                goal_position=np.array(object_pose),
+                goal_orientation=goal_orientation_matrix,
+                initial_joint_angles=initial_joint_angles,
+                max_iterations=100,
+                tolerance=1e-3,
+                learning_rate=0.1
+                )
+            
+            sim.robot.position_control(final_joint_angles)
+            print('Moving to new location.......')
+            print("Final joint angles that the franka has to be in are:", final_joint_angles)
+
+            sim.robot.position_control(final_joint_angles)
+
+            # time_to_wait = 5  # seconds
+            # start_time = time.time()
+
+            # p.setRealTimeSimulation(1)
+
+            # while time.time() - start_time < time_to_wait:
+            #     p.stepSimulation()
+            #     time.sleep(0.01)  # Slow down the simulation
+    
+            #     current_pos, current_ori = sim.robot.get_ee_pose()
+            #     print(f"Current end-effector position: {current_pos}")
+    
+            
+
+            # final_ee_pos, final_ee_ori = sim.robot.get_ee_pose()
+            # print("New end-effector position:", final_ee_pos)
+            # print("New end-effector orientation (quaternion):", final_ee_ori)
+
+
+            for i in range(1000):
                 sim.step()
-                # for getting renders
-                # rgb_ee, depth_ee, seg_ee = sim.get_ee_renders()
-                # print(seg_ee)
-                ## PERCEPTION PIPELINE 
-                #Coarse localization using static camera 
-                rgb_s, depth_s, seg_s = sim.get_static_renders()
-                projection_matrix = np.array(sim.projection_matrix).reshape(4, 4)
-                
-                object_positions = perc.coarse_localization(rgb_s, depth_s, seg_s, projection_matrix)
+                goal_position = np.array([0.65, 0.8, 1.24])
 
-                print("Object Positions:", object_positions)
-
-                for obj_id, centroid in object_positions.items():
-                    x, y, z = centroid
-                    print(f"Object {obj_id}: Centroid at {x:.2f}, {y:.2f}, {z:.2f}")
-                    p.addUserDebugText(f"Obj {obj_id}", [x, y, z], textSize=1.5, lifeTime=5)
+                # Object position
+                object_position = np.array([-0.05018395, -0.46971428, 1.4])
 
                 
+
+              
+
+                # print(sim.robot.gripper_idx)
+                # print(sim.robot.ee_idx)
+                # print(sim.robot.arm_idx)
+                # print(sim.robot.default_arm) 
+                
+                # sim.robot.open_gripper()
+                # p.stepSimulation()
+                # time.sleep(11) 
+                # sim.robot.close_gripper()
+                # p.stepSimulation()
+                # time.sleep(11) 
+                
+                                
+                # pap = PickAndPlace()
+
+                # # Perform pick and place operations
+                # if pap.pick(object_position):
+                #     pap.place(goal_position)
+
+                
+                # #Validating the Solution
+                # ee_pos_ontop_Of_obj = sim.robot.get_ee_pose(ctrl.final_joint_angles)
+                # print("End-effector reached position:",  ee_pos_ontop_Of_obj)
+
+                
+
                 ## PLANNING 
 
                 ## CONTROL
