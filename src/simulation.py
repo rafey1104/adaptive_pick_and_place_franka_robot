@@ -5,6 +5,9 @@ import pybullet as p
 import pybullet_data
 
 from src.robot import Robot
+from src.control import Control
+# from src.perception import Perception
+# from src.pickandplace import PickAndPlace
 from src.objects import Obstacle, Table, Box, YCBObject, Goal
 from src.utils import pb_image_to_numpy
 
@@ -67,6 +70,7 @@ class Simulation:
         p.setAdditionalSearchPath(pybullet_data.getDataPath())
         # starting the simulation
         self.exp_settings = exp_settings
+        self.control = Control()
 
     def reset(self, new_obj_name: Optional[str] = None):
         if new_obj_name:
@@ -221,3 +225,6 @@ class Simulation:
 
     def get_robot(self):
         return self.robot
+    
+    def get_control(self):
+        return self.control
