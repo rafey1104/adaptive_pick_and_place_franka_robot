@@ -1,5 +1,7 @@
 import pybullet as p
 import numpy as np
+import time
+
 from typing import Tuple, List
 
 
@@ -93,9 +95,30 @@ class Robot:
         return np.asarray(ee_pos), np.asarray(ee_ori)
 
     def position_control(self, target_positions):
-        p.setJointMotorControlArray(
+        return p.setJointMotorControlArray(
             self.id,
             jointIndices=self.arm_idx,
             controlMode=p.POSITION_CONTROL,
             targetPositions=target_positions,
         )
+    
+    def open_gripper(self):
+        gripper_opening = [0.04] * len(self.gripper_idx)  # Adjust this value as needed
+        p.setJointMotorControlArray(
+            self.id,
+            jointIndices=self.gripper_idx,
+            controlMode=p.POSITION_CONTROL,
+            targetPositions=gripper_opening,
+            forces=[500] * len(self.gripper_idx)  # Adjust force as needed
+         )
+
+    def close_gripper(self):
+        gripper_closing = [0.0] * len(self.gripper_idx)  # Fully closed position
+        p.setJointMotorControlArray(
+            self.id,
+            jointIndices=self.gripper_idx,
+            controlMode=p.POSITION_CONTROL,
+            targetPositions=gripper_closing,
+            forces=[500] * len(self.gripper_idx)  # Adjust force as needed
+        )
+
