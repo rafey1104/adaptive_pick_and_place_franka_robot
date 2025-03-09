@@ -63,7 +63,7 @@ def run_exp(config: Dict[str, Any]):
             print(f"Robot End Effector Orientation: {ee_ori}")
             print("Performing pick and place for:", obj_name)
 
-            object_pose = (268.43943773, 111.16001867,   1.99634455)
+            object_pose = (111.60049248, -223.69529814,  147.07774477)
 
             object_orientation = (0.0, 0.0, 0.0, 1.0)
             # Convert quaternion to rotation matrix
