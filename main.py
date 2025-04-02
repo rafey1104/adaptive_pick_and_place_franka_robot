@@ -143,7 +143,7 @@ def run_exp(config: Dict[str, Any]):
     print("Simulation Start:")
     print(config['world_settings'], config['robot_settings'])
     object_root_path = ycb_objects.getDataPath()
-    files = glob.glob(os.path.join(object_root_path, "YcbChipsCan"))
+    files = glob.glob(os.path.join(object_root_path, "Ycb*"))
     obj_names = [file.split('/')[-1] for file in files]
     sim = Simulation(config)
     projection_matrix = np.array(sim.projection_matrix).reshape(4, 4)
