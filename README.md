@@ -1,140 +1,131 @@
-# Adaptive Pick and Place Franka Robot (Under Developement)
+# \# 🤖 Intelligent Robotic Manipulation
 
-The overall Goal of the project is to grasp a YCB-Object and place it in a goal basket while avoiding obstacles. Task 1 was to detect the graspable object, Controller (task 2) to move your robot arm, sample and execute a grasp (task 3), localize and track obstacles (task 4) and plan the trajectory to place the object in the goal, while avoiding the obstacles (task 5). Note that, what we mention in the task subparts are just for guidance and you are fully free to choose whatever you want to use to accomplish the full task. But you need to make sure that you don't use privilege information from the sim in the process.
+Welcome to the **Intelligent Robotic Manipulation** project! The objective of this project is to design and implement a robotic system that can **grasp a YCB object** and **place it in a goal basket** while effectively **avoiding obstacles**. This repository includes guidance, code, and configurations to accomplish this.
 
-## Setting up the development environment 
+---
 
+## 📌 Project Overview
 
-```shell
+The project is divided into 5 major tasks:
+
+1. **Perception** - Detect the graspable object using a dual-camera setup.
+2. **Control** - Move the robot arm using a custom IK-solver.
+3. **Grasping** - Design and execute a grasp strategy.
+4. **Localization \& Tracking** - Track and avoid dynamic/static obstacles.
+5. **Planning** - Plan a safe trajectory to place the object into a goal receptacle.
+
+---
+
+## 🔧 Installation \& Setup
+
+```bash
 git clone https://github.com/rafey1104/adaptive_pick_and_place_franka_robot.git
-```
-```shell
 cd adaptive_pick_and_place_franka_robot
-```
-```shell
+
 conda create -n irobman python=3.8
-```
-```shell
 conda activate irobman
-```
-```shell
 conda install pybullet
-```
-```shell
 pip install matplotlib pyyaml
-```
-```shell
-git clone https://github.com/eleramp/pybullet-object-models.git # inside the irobman_project folder
-```
-```shell
+
+git clone https://github.com/eleramp/pybullet-object-models.git  # inside the irobman_project folder
 pip install -e pybullet-object-models/
 ```
 
+Make sure `pybullet.isNumpyEnabled()` returns True (optional but recommended).
 
+---
 
-Note that you should check after the installation if pybullet is using numpy or not by running `pybullet.isNumpyEnabled()` in your code. Everything can still run without this too but it will be slow. You can also increase the speed of execution by choosing not to see the camera output in the GUI by toggling `cam_render_flag`. You will be able to still see the GUI but the cam output there will not be visible.
+## Running the project
+```bash
+python3 main.py
+```
 
-## Codebase Structure
+## 🗂️ Codebase Structure
 
-```shell
-
+```
 ├── configs
-│   └── test_config.yaml # config file for your experiments (you can make your own)
-├── main.py # example runner file (you can add a bash script here as well)
+│   └── test_config.yaml         # Experiment configurations
+├── main.py                      # Example runner script
 ├── README.md
 └── src
-    ├── objects.py # contains all objects and obstacle definitions
-    ├── robot.py # robot class
-    ├── simulation.py # simulation class
-    └── utils.py # helpful utils
+    ├── objects.py               # Object and obstacle definitions
+    ├── robot.py                 # Robot class
+    ├── simulation.py            # Simulation environment
+    └── control.py               # Conrol class 
+    ├──perception.py             # perception class
+    ├── utility.py               # utility functions
+    ├── pickandplace.py          # pick and place function
+
+
+
 
 ```
 
-### Things you can change and data that you can use:
+---
 
-- Testing with custom objects
-- Testing with different control modes
-- Toggling obstacles on and off
-- Adding new metrics for better report and explanation
-- Information such as:
-    - Robot joint information
-    - Robot gripper and end-effector information
-    - Any information from camera
-    - Goal receptacle position
-    - Camera position/matrices
+## 🧠 Tasks Breakdown
 
-### Things you cannot change without an explicit request to course TA's/Professor:
-- Any random sampling in the sim
-- Number of obstacles
-- Ground truth position of the object in question
-- Any ground truth orientation
-- Robot initial position and arm orientation
-- Goal receptacle position
-- Using built in high level pybullet methods like `calculateInverseDynamics`, `calculateInverseKinematics`
+### ✅ Task 1: Perception (6D Pose Estimation)
 
+Use a static camera for coarse object detection and an end-effector-mounted camera for fine pose estimation.
 
-_Note: If you want to add a new metric you can use ground truth information there but only for comparison with your prediction._
+![Perception](images/perception_view.jpg)
+🎥 [Watch Perception in Action](videos/perception_demo.mp4)
 
-### Checkpoints & Marks:
-- Code Related
-    - Being able to detect the object and get it’s pose (+15)
-    - Moving the arm to the object (+15)
-    - Being able to grasp object (+15)
-    - Being able to move the arm with the object to goal position (without obstacles) (+20)
-    - Detecting and tracking the obstacles (+15)
-    - Full setup: Being able to execute pick and place with obstacles present (+30)
-- A part of your marks is also fixed on the report (+10)
+Used:
 
-We will only consider the checkpoints as complete if you provide a metric or a success rate for each. 
-The format of the report will be the standard TU-Darmstadt format.
+- Global \& ICP Registration
+- MegaPose(explored)
+- Synthetic masks from PyBullet
 
-## Task 1 (Perception)
-Implement an object 6D pose estimation workflow using a simulation environment with two cameras. The first camera is static, positioned in front of a table, and is suitable for obstacle detection and coarse object localization. The second camera is mounted on the robot’s end-effector, aligned with robot link 11, and is used for refined pose estimation and grasping. Note that the camera's Y-axis points upward. For debugging, you can press W to toggle wireframe mode and J to display the axes in the GUI. You are encouraged to integrate state-of-the-art (SOTA) model-based 6D pose estimation methods or apply conventional approaches such as RANSAC and Iterative Closest Point (ICP), as demonstrated in the course. Additionally, synthetic masks generated by PyBullet can be used for object segmentation. 
+---
 
-*Reference*
-Global registration (coarse pose estimation) [Tutorial](https://www.open3d.org/docs/release/tutorial/pipelines/global_registration.html)
-ICP registration (coarse pose estimation) [Tutorial](https://www.open3d.org/docs/release/tutorial/pipelines/global_registration.html)
-MegaPose, a method to estimate the 6D pose of novel objects, that is, objects unseen during training. [repo](https://github.com/megapose6d/megapose6d)
+### ✅ Task 2: Controller (Inverse Kinematics)
 
-Task 1: 6D Pose Estimation using the static and end-effector cameras. The complete perception pipeline:
+Implemented an IK-solver (e.g., pseudo-inverse) for the Franka Panda robot to reach target positions.
 
-✅ Capture RGB-D images from both cameras
-✅ Segment objects using PyBullet’s segmentation mask
-✅ Convert depth images into 3D point clouds
-✅ Apply coarse localization using the static camera
-✅ Refine the pose using ICP registration with the end-effector camera
-✅ Visualize the point clouds using Open3D
+![Controller](images/controller_view.jpg)
+🎥 [Watch Controller in Action](videos/controller_demo.mp4)
 
+---
 
-## Task 2 (Control)
+### ✅ Task 3: Grasping
 
-Implement an IK-solver for the Franka-robot. You can use the pseudo-inverse or the transpose based solution. Use Your IK-solver to move the robot to a certain goal position. This Controller gets used throughout the project (e.g. executing the grasp - moving the object to the goal).
+Used our IK-based controller and camera to execute object grasps. Begin with fixed objects (e.g., foam brick) and extend to random YCB items.
 
-## Task 3 (Grasping)
+![Grasping](images/grasping_view.jpg)
+🎥 [Watch Grasping in Action](videos/grasping_demo.mp4)
 
-Now that you have implemented a controller (with your IK solver) and tested it properly, it is time to put that to good use. From picking up objects to placing them a good well-placed grasp is essential. Hence, given an object you have to design a system that can effectively grasp it. You can use the model from the ![Grasping exercise](https://github.com/iROSA-lab/GIGA) and ![colab](https://colab.research.google.com/drive/1P80GRK0uQkFgDbHzLjwahyJOalW4M5vU?usp=sharing) to sample a grasp from a point-cloud. We have added a camera, where you can specify its position. You can set the YCB object to a fixed one (e.g. a Banana) for development. Showcase your ability to grasp random objects
-for the final submission.
+---
 
-## Task 4 (Localization & Tracking)
+### ✅ Task 4: Localization \& Tracking
 
-After you have grasped the object you want to place it in the goal-basket. In order to avoid the obstacles (red spheres), you need to track them. Use the provided fixed camera and your custom-positioned cameras as sensors to locate and track the obstacles. Visualize your tracking capabilities in the Report (optional) and use this information to avoid collision with them in the last task. You could use a Kalman Filter (e.g. from Assignment 2).
+Tracks red sphere obstacles using the static camera setup and visualize obstacle motion.  Used Kalman Filter.
 
-## Task 5 (Planning)
+![Tracking](images/tracking_view.jpg)
+🎥 [Watch Tracking in Action](videos/tracking_demo.mp4)
 
-After you have grasped the YCB object and localized the obstacle, the final task is to plan the robot’s movement in order to place the object in the goal basket. Implement a motion planner to avoid static and dynamic obstacles and execute it with your controller. Once you are above the goal-basket open the gripper to drop the object in the goal.
+---
 
-The most naive/cheating way of doing grasping can be run as
-```
-python3 -m pybullet_robots.panda.loadpanda_grasp
-```
-The code can be found [here](https://github.com/bulletphysics/bullet3/blob/master/examples/pybullet/gym/pybullet_robots/panda/loadpanda_grasp.py), and there is no collision avoidance at all.
+### ✅ Task 5: Planning
 
-Motion planning can be generally decoupled into global planning and motion planning. Global planning is responsible for generate a reference path to avoid static obstacles while local planning is for keeping track of the reference path and avoid dynamic obstacles. 
-* For global planning, 
-    * An easy way is to use sampling-based methods (rrt, prm) to sample the reference path directly in 3d space and use your designed IK solver to track the path, see [here](https://github.com/yijiangh/pybullet_planning/tree/dev/src/pybullet_planning/motion_planners) for more algorithmic details.
-    * A faster but difficult solution is to sample the path directly in the configuration space so here you do not need the IK solver. You can see [here](https://github.com/sea-bass/pyroboplan) for an example, though it is not implemented using pybullet.
-* For local planning, after you have a prediction of the moving obstacles,
-    * An easy way is to use potential field method to avoid them. You can check [here](https://github.com/PulkitRustagi/Potential-Field-Path-Planning) for more details.
-    * A more advanced approach is to use MPC or sampling-based MPC to handle the moving obstacles. You can check [this](https://github.com/tud-amr/m3p2i-aip) for more details, though the kinematic model and collision checking are done in IsaacGym.
+Planned a trajectory to the goal while avoiding obstacles. 
 
-You can decide to use whichever techniques to solve the task, you can use either a `global planner` and a `local planner` combination, or you can directly use the sampling-based MPC to avoid static and dynamic obstacles.
+![Planning](images/planning_view.jpg)
+🎥 [Watch Planning in Action](videos/planning_demo.mp4)
+
+Example (no obstacle avoidance):
+
+## 📎 Submission Format
+
+1. GitHub repository with a **clear README** and **runnable scripts**
+2. Final **report (PDF)** in **TU-Darmstadt format**
+
+---
+
+## 📝 Tips
+
+- Use `W` to toggle wireframe mode
+- Press `J` to display axes in GUI
+- Disable cam output to speed up simulation
+- Use debug GUI and log intermediate outputs
